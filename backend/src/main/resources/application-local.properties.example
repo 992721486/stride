@@ -1,0 +1,11 @@
+# 本地开发用配置模板
+# 用法：复制本文件为 application-local.properties 并填入真实值
+#       application-local.properties 已被 .gitignore 排除，不会上传到 GitHub
+#
+# 该文件通过 application.properties 里的 spring.config.import 自动加载
+
+# MySQL 密码
+spring.datasource.password=你的数据库密码
+
+# JWT 密钥（至少 32 字节，HS256 要求）
+jwt.secret=换成一串足够长的随机字符串

@@ -1,0 +1,64 @@
+# ============================================================
+#  根目录 .gitignore
+#  作用：告诉 Git 哪些文件永远不要提交
+#  规则：每行一个模式；以 / 开头表示从仓库根算起；! 表示反向排除
+# ============================================================
+
+# ---------- 【最重要】敏感信息：绝不能上传 ----------
+# 里面的数据库密码、JWT 密钥一旦推到 GitHub，等于公开发布
+application-local.properties
+application-local.yml
+*.local
+.env
+.env.local
+
+# ---------- 个人笔记：不上传（属于私人复习资料，不是项目的一部分）----------
+面试复习-项目代码精讲.md
+
+# ---------- 构建产物：可以随时重新生成，不需要版本控制 ----------
+target/
+build/
+dist/
+dist-ssr/
+*.jar
+*.war
+*.class
+
+# 例外：Maven Wrapper 的 jar 需要保留（保证别人 clone 后不用装 Maven 就能构建）
+!**/.mvn/wrapper/maven-wrapper.jar
+
+# ---------- 依赖目录：体积巨大（本项目 node_modules 有 112MB）----------
+node_modules/
+.pnpm-store/
+
+# ---------- 日志 ----------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- IDE 配置：因人而异，不该共享 ----------
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+.factorypath
+.sts4-cache
+.apt_generated
+
+# ---------- 操作系统生成的垃圾文件 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 本地临时文件 ----------
+*.tmp
+*.bak
+*.orig
