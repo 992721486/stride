@@ -16,7 +16,7 @@
 	<artifactId>stride</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>stride</name>
-	<description>Stride - 个人跑步训练管理系统</description>
+	<description>Stride · 业余跑者训练管理平台</description>
 	<properties>
 		<java.version>17</java.version> <!-- 确保你的 JDK 是 17 或更高 -->
 	</properties>
