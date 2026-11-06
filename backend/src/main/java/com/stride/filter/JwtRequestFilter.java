@@ -29,22 +29,21 @@ public class JwtRequestFilter implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
 
-        // 放行跨域预检请求（OPTIONS）。
-        // 浏览器在发 PUT/DELETE 或带自定义头的请求前会先发 OPTIONS 探测，
-        // 这个请求不带 Authorization，如果不放行就会被拦成 401，导致跨域失败。
+        // 要实现 HandlerInterceptor 接口，必须重写 preHandle 方法：返回 true 放行，抛异常拦截
+
+        // 放行跨域预检（OPTIONS）：浏览器发 PUT/DELETE 前会先探测一次，这个请求不带 Token
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
 
-        final String authorizationHeader = request.getHeader("Authorization");
+        final String authorization = request.getHeader("Authorization");
         String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            jwt = authorization.substring(7);
         }
 
         // 没有携带 Token → 401 未认证
@@ -52,10 +51,8 @@ public class JwtRequestFilter implements HandlerInterceptor {
             throw new BusinessException(401, "未登录或登录已过期");
         }
 
-        // 【修复点：先解析，把 JWT 异常交给全局异常处理器 → 返回 401 而不是 500】
-        // 原来的写法是 extractUsername() 直接调用，且没有任何 try-catch，
-        // Token 过期时抛出的 ExpiredJwtException 会一路冒泡变成 500。
-        // 这里显式捕获并抛 BusinessException(401)，语义才正确。
+        // 解析失败（过期 / 签名不匹配 / 格式错）统一转 401：
+        // 若不捕获，异常冒泡出去就是 500，前端会以为服务器挂了
         String username;
         Integer role;
         try {
@@ -65,18 +62,14 @@ public class JwtRequestFilter implements HandlerInterceptor {
             // 过期、签名不匹配、格式错误都会走到这里
             throw new BusinessException(401, "登录状态已失效，请重新登录");
         }
-
         if (username == null) {
             throw new BusinessException(401, "登录状态已失效，请重新登录");
         }
 
         // ============ 鉴权：基于角色的访问控制（RBAC）============
-        // 这是原来完全缺失的一环。原代码只校验了 Token 有效性，
-        // 从不读取 role，导致普通用户也能访问管理端接口（越权漏洞）。
+        // role == null || 不能省：Integer 与 1 比较会自动拆箱，null 拆箱会空指针
         if (requiresAdmin(request) && (role == null || role != 1)) {
-            // 403 而不是 401：
-            //   401 = 未认证（你是谁我不知道）→ 前端应跳登录页
-            //   403 = 已认证但无权限（我知道你是谁，但你不许访问）→ 前端应提示无权限
+            // 403 而不是 401：401 = 不知道你是谁（去登录）；403 = 知道你是谁，但你不许进
             throw new BusinessException(403, "无权限访问该资源");
         }
 
@@ -84,7 +77,6 @@ public class JwtRequestFilter implements HandlerInterceptor {
         request.setAttribute("currentUsername", username);
         request.setAttribute("currentUserId", jwtUtil.extractUserId(jwt));
         request.setAttribute("currentRole", role);
-
         return true;
     }
 
