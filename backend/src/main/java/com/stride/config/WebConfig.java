@@ -9,17 +9,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtRequestFilter)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/users/register", "/api/users/login");
     }
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
