@@ -7,6 +7,10 @@ public class BusinessException extends RuntimeException {
         super(message);
         this.code = code;
     }
+    public BusinessException(String message) {
+        this(400, message);            // this(...) 复用上面的双参构造器
+    }
+
     public Integer getCode() {
         return code;
     }
